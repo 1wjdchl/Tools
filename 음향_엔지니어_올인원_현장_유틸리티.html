@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FOH MASTER PRO — OLED Black Edition</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts: Strictly Noto Sans KR, Noto Sans & Noto Sans Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&family=Noto+Sans+Mono:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans KR"', '"Noto Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        mono: ['"Noto Sans Mono"', '"Noto Sans KR"', 'monospace'],
+                    },
+                    colors: {
+                        oled: {
+                            black: '#000000',
+                            surface: '#09090b',
+                            elevated: '#121215',
+                            border: '#1f1f22',
+                            borderLight: '#27272a',
+                            muted: '#71717a',
+                            text: '#e4e4e7',
+                            heading: '#f4f4f5'
+                        },
+                        accent: {
+                            cyan: '#00f2fe',
+                            emerald: '#10b981',
+                            amber: '#f59e0b',
+                            rose: '#f43f5e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        html, body {
+            background-color: #000000;
+            color: #e4e4e7; /* Softened off-white to prevent halation/light-bleeding on OLED black */
+            font-family: 'Noto Sans KR', 'Noto Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            letter-spacing: -0.03em;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, h4, strong, .heading-tone {
+            color: #f4f4f5;
+            letter-spacing: -0.035em;
+        }
+        /* Prevent horizontal jitter on all numeric readouts, inputs, and tables */
+        .font-mono,
+        .tabular-nums,
+        input[type="number"],
+        table td,
+        table th {
+            font-family: 'Noto Sans Mono', 'Noto Sans KR', monospace;
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum" 1, "zero" 1;
+            letter-spacing: -0.015em;
+        }
+        /* Minimal Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3f3f46;
+        }
+
+        /* Pro Audio Card & Readout Surfaces */
+        .pro-card {
+            background-color: #09090b;
+            border: 1px solid #1f1f22;
+            border-radius: 12px;
+            transition: border-color 0.2s ease;
+        }
+        .pro-card:hover {
+            border-color: #27272a;
+        }
+        .oled-readout {
+            background-color: #000000;
+            border: 1px solid #1f1f22;
+            border-radius: 10px;
+        }
+        .pro-input {
+            background-color: #000000;
+            border: 1px solid #27272a;
+            color: #f4f4f5;
+            border-radius: 8px;
+            transition: all 0.15s ease;
+        }
+        .pro-input:focus {
+            outline: none;
+            border-color: #06b6d4;
+            box-shadow: 0 0 0 1px rgba(6, 182, 212, 0.25);
+        }
+
+        /* Modern Pro-Audio Range Slider (FabFilter / Linear Style) */
+        input[type="range"].pro-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            background: #18181b;
+            height: 4px;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+        input[type="range"].pro-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #000000;
+            border: 2px solid #06b6d4;
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+            cursor: pointer;
+            transition: transform 0.12s ease, border-color 0.12s ease;
+        }
+        input[type="range"].pro-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            border-color: #22d3ee;
+        }
+        input[type="range"].pro-slider-amber::-webkit-slider-thumb {
+            border-color: #f59e0b;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+
+        /* Micro-interactions */
+        .tap-pulse {
+            transform: scale(0.985);
+            border-color: #f59e0b !important;
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.22);
+        }
+        .copy-cell {
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .copy-cell:hover {
+            background-color: #121215;
+        }
+        .copy-cell:active {
+            transform: scale(0.98);
+        }
+
+        @media print {
+            html, body { background: #ffffff !important; color: #000000 !important; }
+            .no-print { display: none !important; }
+            .pro-card, .oled-readout { background: #ffffff !important; border: 1px solid #cccccc !important; color: #000000 !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-oled-black text-oled-text selection:bg-cyan-500 selection:text-black">
+
+    <!-- Minimal Floating Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 hidden bg-zinc-950/95 backdrop-blur-md border border-zinc-800 text-zinc-100 px-4 py-2.5 rounded-lg shadow-2xl flex items-center space-x-2.5 transition-all duration-200">
+        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+        <span id="toast-msg" class="font-mono text-xs tracking-tight">COPIED TO CLIPBOARD</span>
+    </div>
+
+    <!-- Top Minimal Header Bar -->
+    <header class="bg-oled-black/90 backdrop-blur-md border-b border-oled-border sticky top-0 z-40 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
+            <!-- Brand Identity -->
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center">
+                    <i class="fa-solid fa-wave-square text-cyan-400 text-sm"></i>
+                </div>
+                <div class="flex items-center space-x-2.5">
+                    <h1 class="font-bold text-sm sm:text-base tracking-tight text-white">FOH MASTER</h1>
+                    <span class="text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">OLED BLACK</span>
+                </div>
+            </div>
+
+            <!-- Utility Bar: Wake Lock, Reset & Digital Timecode -->
+            <div class="flex items-center space-x-2">
+                <button id="wakeLockBtn" onclick="toggleWakeLock()" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-oled-surface hover:bg-zinc-900 border border-oled-border text-xs font-medium text-zinc-300 transition">
+                    <span id="wakeLockDot" class="w-1.5 h-1.5 rounded-full bg-zinc-600"></span>
+                    <span id="wakeLockText" class="font-mono text-[11px]">WAKE LOCK: OFF</span>
+                </button>
+
+                <button onclick="resetAllData()" title="초기 데이터로 리셋" class="p-2 rounded-lg bg-oled-surface hover:bg-zinc-900 border border-oled-border text-zinc-400 hover:text-rose-400 text-xs transition">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+
+                <div class="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-oled-surface border border-oled-border">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <span id="liveClock" class="font-mono text-xs text-zinc-300 font-medium tracking-wider">00:00:00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Linear-Style Navigation Bar -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 flex overflow-x-auto no-scrollbar border-t border-oled-border/60">
+            <button onclick="switchTab('tab-bpm')" id="btn-tab-bpm" class="tab-btn flex items-center space-x-2 px-4 py-3 text-xs font-medium border-b-2 border-cyan-400 text-white whitespace-nowrap transition">
+                <span class="font-mono text-[11px] text-cyan-400">01</span>
+                <span>리버브 & 딜레이 타임</span>
+            </button>
+            <button onclick="switchTab('tab-acoustic')" id="btn-tab-acoustic" class="tab-btn flex items-center space-x-2 px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 whitespace-nowrap transition">
+                <span class="font-mono text-[11px] text-zinc-600">02</span>
+                <span>음향 물리 & 스피커 계산</span>
+            </button>
+            <button onclick="switchTab('tab-signal')" id="btn-tab-signal" class="tab-btn flex items-center space-x-2 px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 whitespace-nowrap transition">
+                <span class="font-mono text-[11px] text-zinc-600">03</span>
+                <span>시그널 제너레이터 & RTA</span>
+            </button>
+            <button onclick="switchTab('tab-patch')" id="btn-tab-patch" class="tab-btn flex items-center space-x-2 px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 whitespace-nowrap transition">
+                <span class="font-mono text-[11px] text-zinc-600">04</span>
+                <span>패치 시트 · 전원 · 핀배열</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+        <!-- =========================================================
+             TAB 1: 리버브 & 딜레이 타임 계산기
+             ========================================================= -->
+        <section id="tab-bpm" class="tab-content space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Left: BPM Engine & Tap Tempo -->
+                <div class="lg:col-span-5 pro-card p-5 flex flex-col justify-between space-y-5">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-1.5 h-4 bg-amber-400 rounded-full"></span>
+                                <h2 class="text-sm font-semibold text-white tracking-tight">TEMPO ENGINE & TAP</h2>
+                            </div>
+                            <span id="tapStatusBadge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-zinc-900 text-zinc-500 border border-zinc-800">STANDBY</span>
+                        </div>
+
+                        <!-- Pure Black Readout Display -->
+                        <div class="oled-readout p-4 flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] font-mono uppercase tracking-widest text-zinc-500 block">MASTER BPM</span>
+                                <div class="flex items-baseline space-x-2 mt-1">
+                                    <input type="number" id="bpmInput" min="30" max="300" step="0.1" value="120" oninput="handleBpmChange(this.value)"
+                                        class="bg-transparent font-mono text-4xl sm:text-5xl font-bold text-white w-36 focus:outline-none border-b border-zinc-800 focus:border-amber-400 transition">
+                                    <span class="font-mono text-xs text-amber-400 uppercase">BPM</span>
+                                </div>
+                            </div>
+                            <div class="text-right font-mono">
+                                <span class="text-[10px] uppercase tracking-widest text-zinc-500 block">1/4 QUARTER NOTE</span>
+                                <span id="quarterNoteHero" class="text-2xl font-semibold text-cyan-400 mt-1 block">500.0 ms</span>
+                                <span id="quarterFreqHero" class="text-[11px] text-zinc-500 block mt-0.5">2.00 Hz</span>
+                            </div>
+                        </div>
+
+                        <!-- Slider & Fine Nudge Controls -->
+                        <div class="space-y-3 pt-1">
+                            <input type="range" id="bpmSlider" min="40" max="240" step="0.5" value="120" oninput="handleBpmChange(this.value)" class="w-full pro-slider pro-slider-amber">
+                            <div class="grid grid-cols-6 gap-1.5 font-mono text-xs">
+                                <button onclick="nudgeBpm(-5)" class="py-1.5 rounded bg-black hover:bg-zinc-900 text-zinc-400 border border-oled-border transition">-5</button>
+                                <button onclick="nudgeBpm(-1)" class="py-1.5 rounded bg-black hover:bg-zinc-900 text-zinc-400 border border-oled-border transition">-1</button>
+                                <button onclick="handleBpmChange(72)" class="py-1.5 rounded bg-black hover:bg-zinc-900 text-amber-400/90 border border-oled-border transition">72</button>
+                                <button onclick="handleBpmChange(100)" class="py-1.5 rounded bg-black hover:bg-zinc-900 text-amber-400/90 border border-oled-border transition">100</button>
+                                <button onclick="nudgeBpm(1)" class="py-1.5 rounded bg-black hover:bg-zinc-900 text-zinc-400 border border-oled-border transition">+1</button>
+                                <button onclick="nudgeBpm(5)" class="py-1.5 rounded bg-black hover:bg-zinc-900 text-zinc-400 border border-oled-border transition">+5</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Minimalist Tactile Tap Pad -->
+                    <button id="tapTempoBtn" onmousedown="registerTap(event)" ontouchstart="registerTap(event)"
+                        class="w-full py-6 rounded-xl bg-black hover:bg-zinc-950 border border-zinc-800 hover:border-amber-500/60 text-white flex flex-col items-center justify-center transition duration-150 select-none group">
+                        <div class="flex items-center space-x-2.5">
+                            <span class="w-2 h-2 rounded-full bg-amber-400 group-hover:scale-125 transition"></span>
+                            <span class="font-mono font-bold text-sm tracking-widest uppercase">TAP TEMPO PAD</span>
+                            <span class="text-[11px] font-mono text-zinc-500 border border-zinc-800 px-1.5 py-0.5 rounded">SPACE</span>
+                        </div>
+                        <span class="text-[11px] text-zinc-500 mt-1.5">박자에 맞춰 터치하거나 스페이스바 연타 (3초 후 자동 리셋)</span>
+                    </button>
+                </div>
+
+                <!-- Right: Genre/Instrument Reverb Time Recommender -->
+                <div class="lg:col-span-7 pro-card p-5 flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-1.5 h-4 bg-cyan-400 rounded-full"></span>
+                                <h2 class="text-sm font-semibold text-white tracking-tight">REVERB TIME DESIGNER (PRE-DELAY & RT60 DECAY)</h2>
+                            </div>
+                            <span class="text-[11px] font-mono text-cyan-400 bg-cyan-950/30 border border-cyan-900/50 px-2 py-0.5 rounded">CLICK VALUE TO COPY</span>
+                        </div>
+                        <p class="text-xs text-zinc-400 mb-4">
+                            음원 명료도를 확보하는 <strong>Pre-Delay(초기 반사 지연)</strong>와 다음 박자 마스킹을 방지하는 <strong>실제 Decay Time(RT60 = 목표 음표 길이 - Pre-Delay)</strong> 추천값입니다.
+                        </p>
+
+                        <div id="reverbPresetCards" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <!-- Dynamically populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="oled-readout px-3.5 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] font-mono text-zinc-400">
+                        <div>
+                            <span class="text-cyan-400">FORMULA:</span> 1/4 Note(ms) = 60,000 / BPM &nbsp;|&nbsp; Decay(RT60) = Target Note(ms) - Pre-Delay(ms)
+                        </div>
+                        <span class="text-zinc-500">1.00 s = 1,000 ms</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full Delay Note Subdivision Matrix -->
+            <div class="pro-card p-5 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="w-1.5 h-4 bg-emerald-400 rounded-full"></span>
+                            <h2 class="text-sm font-semibold text-white tracking-tight">DELAY SUBDIVISION & LFO MATRIX (1 BAR — 1/64 NOTE)</h2>
+                        </div>
+                        <p class="text-xs text-zinc-400 mt-1">각 수치(ms)를 클릭하면 클립보드에 즉시 복사됩니다. LFO/모듈레이션 세팅을 위한 주파수(Hz)가 함께 표시됩니다.</p>
+                    </div>
+                    <div class="flex items-center space-x-2 text-[11px] font-mono">
+                        <span class="px-2 py-1 rounded bg-black border border-oled-border text-amber-400">NORMAL (×1.0)</span>
+                        <span class="px-2 py-1 rounded bg-black border border-oled-border text-cyan-400">DOTTED (×1.5)</span>
+                        <span class="px-2 py-1 rounded bg-black border border-oled-border text-emerald-400">TRIPLET (×0.667)</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto rounded-lg border border-oled-border bg-black">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-oled-border text-[11px] font-mono uppercase text-zinc-500 bg-oled-surface">
+                                <th class="py-3 px-4">NOTE SUBDIVISION</th>
+                                <th class="py-3 px-4">정박 (NORMAL)</th>
+                                <th class="py-3 px-4">점음표 (DOTTED)</th>
+                                <th class="py-3 px-4">셋잇단음표 (TRIPLET)</th>
+                                <th class="py-3 px-4">FOH MIXING APPLICATION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="delayTableBody" class="divide-y divide-oled-border text-sm font-mono">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             TAB 2: 음향 물리 & 스피커 계산기
+             ========================================================= -->
+        <section id="tab-acoustic" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- 1. Delay Tower & Speed of Sound -->
+                <div class="pro-card p-5 flex flex-col justify-between space-y-5">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-oled-border pb-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-1.5 h-4 bg-amber-400 rounded-full"></span>
+                                <h2 class="text-sm font-semibold text-white">딜레이 타워 & 음속 계산기</h2>
+                            </div>
+                            <span class="text-[10px] font-mono text-amber-400 border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 rounded">TIME ALIGNMENT</span>
+                        </div>
+
+                        <p class="text-xs text-zinc-400">메인 PA와 딜레이 스피커 간의 거리(m) 및 현장 기온(°C)을 입력하여 온도 보정된 음속과 정렬 딜레이 시간을 산출합니다.</p>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-mono text-zinc-400 mb-1.5">DISTANCE (m)</label>
+                                <input type="number" id="delayDistInput" value="15" min="0.1" step="0.5" oninput="calculateAcoustics()"
+                                    class="w-full pro-input px-3 py-2 font-mono text-lg">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-mono text-zinc-400 mb-1.5">TEMP (°C)</label>
+                                <input type="number" id="delayTempInput" value="22" min="-20" max="50" step="1" oninput="calculateAcoustics()"
+                                    class="w-full pro-input px-3 py-2 font-mono text-lg">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-1.5 flex-wrap font-mono text-xs">
+                            <span class="text-[11px] text-zinc-500 mr-1">PRESET:</span>
+                            <button onclick="setDelayDist(5)" class="px-2 py-1 rounded bg-black border border-oled-border hover:border-zinc-700 text-zinc-300">5m</button>
+                            <button onclick="setDelayDist(10)" class="px-2 py-1 rounded bg-black border border-oled-border hover:border-zinc-700 text-zinc-300">10m</button>
+                            <button onclick="setDelayDist(15)" class="px-2 py-1 rounded bg-black border border-oled-border hover:border-zinc-700 text-zinc-300">15m</button>
+                            <button onclick="setDelayDist(20)" class="px-2 py-1 rounded bg-black border border-oled-border hover:border-zinc-700 text-zinc-300">20m</button>
+                            <button onclick="setDelayDist(30)" class="px-2 py-1 rounded bg-black border border-oled-border hover:border-zinc-700 text-zinc-300">30m</button>
+                        </div>
+
+                        <!-- Result Display -->
+                        <div class="oled-readout p-4 space-y-3">
+                            <div class="flex justify-between items-center border-b border-oled-border pb-3">
+                                <div>
+                                    <span class="text-[10px] font-mono text-zinc-500 uppercase block">ALIGNMENT DELAY</span>
+                                    <span class="text-xs text-zinc-400">클릭하여 수치 복사</span>
+                                </div>
+                                <button onclick="copyText(document.getElementById('resDelayMs').innerText)" class="text-right group">
+                                    <span id="resDelayMs" class="font-mono text-3xl font-bold text-amber-400 group-hover:underline">43.52 ms</span>
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 font-mono text-xs">
+                                <div>
+                                    <span class="text-[10px] text-zinc-500 block">SPEED OF SOUND</span>
+                                    <span id="resSoundSpeed" class="text-cyan-400 font-semibold text-sm">344.7 m/s</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[10px] text-zinc-500 block">HAAS EFFECT (+15ms)</span>
+                                    <span id="resHaasDelay" onclick="copyText(this.innerText)" class="text-emerald-400 font-semibold text-sm cursor-pointer hover:underline">58.52 ms</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-oled-border text-[11px] font-mono text-zinc-500 space-y-1">
+                        <div>c = 331.5 + (0.6 × T°C)</div>
+                        <div>Delay(ms) = (Distance / c) × 1000</div>
+                    </div>
+                </div>
+
+                <!-- 2. Frequency Wavelength & Room Mode Calculator -->
+                <div class="pro-card p-5 flex flex-col justify-between space-y-5">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-oled-border pb-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-1.5 h-4 bg-cyan-400 rounded-full"></span>
+                                <h2 class="text-sm font-semibold text-white">주파수 파장 & 정재파 계산기</h2>
+                            </div>
+                            <span class="text-[10px] font-mono text-cyan-400 border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 rounded">WAVELENGTH (λ)</span>
+                        </div>
+
+                        <p class="text-xs text-zinc-400">피드백이나 룸 공진 주파수(Hz)를 입력하여 1파장, 1/2파장(180° 역위상 거리), 1/4파장(카디오이드 서브우퍼 간격)을 계산합니다.</p>
+
+                        <div>
+                            <label class="block text-[11px] font-mono text-zinc-400 mb-1.5">TARGET FREQUENCY (Hz)</label>
+                            <input type="number" id="waveFreqInput" value="80" min="20" max="20000" step="1" oninput="calculateAcoustics()"
+                                class="w-full pro-input px-3 py-2 font-mono text-lg">
+                        </div>
+
+                        <div class="flex items-center gap-1.5 flex-wrap font-mono text-xs">
+                            <button onclick="setWaveFreq(63)" class="px-2 py-1 rounded bg-black border border-oled-border hover:border-zinc-700 text-zinc-300">63Hz</button>
+                            <button onclick="setWaveFreq(80)" class="px-2 py-1 rounded bg-black border border-oled-border hover:border-zinc-700 text-zinc-300">80Hz</button>
+                            <button onclick="setWaveFreq(100)" class="px-2 py-1 rounded bg-black border border-oled-border hover:border-zinc-700 text-zinc-300">100Hz</button>
+                            <button onclick="setWaveFreq(250)" class="px-2 py-1 rounded bg-black border border-oled-border hover:border-zinc-700 text-zinc-300">250Hz</button>
+                            <button onclick="setWaveFreq(1000)" class="px-2 py-1 rounded bg-black border border-oled-border hover:border-zinc-700 text-zinc-300">1kHz</button>
+                            <button onclick="setWaveFreq(4000)" class="px-2 py-1 rounded bg-black border border-oled-border hover:border-zinc-700 text-zinc-300">4kHz</button>
+                        </div>
+
+                        <div class="oled-readout p-4 space-y-2.5 font-mono">
+                            <div class="flex justify-between items-center border-b border-oled-border pb-2">
+                                <div>
+                                    <span class="text-xs text-zinc-300 block">1λ 파장 (360° Cycle)</span>
+                                    <span class="text-[10px] text-zinc-500 font-sans">위상 완전 일치 주기</span>
+                                </div>
+                                <span id="resWaveFull" class="text-base font-bold text-cyan-400">4.31 m (431 cm)</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-oled-border pb-2">
+                                <div>
+                                    <span class="text-xs text-zinc-300 block">1/2λ 파장 (180° 역위상)</span>
+                                    <span class="text-[10px] text-rose-400/80 font-sans">위상 캔슬링 및 정재파 거리</span>
+                                </div>
+                                <span id="resWaveHalf" class="text-base font-bold text-amber-400">2.15 m (215 cm)</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="text-xs text-zinc-300 block">1/4λ 파장 (90° Offset)</span>
+                                    <span class="text-[10px] text-emerald-400/80 font-sans">카디오이드 서브우퍼 물리 간격</span>
+                                </div>
+                                <span id="resWaveQuarter" class="text-base font-bold text-emerald-400">1.08 m (108 cm)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-oled-border text-[11px] font-mono text-zinc-500 flex justify-between">
+                        <span>λ = c / f</span>
+                        <span>1 Cycle Period: <strong id="resWavePeriod" class="text-zinc-300">12.50 ms</strong></span>
+                    </div>
+                </div>
+
+                <!-- 3. Inverse Square Law & Amplifier Power Ratio -->
+                <div class="pro-card p-5 flex flex-col justify-between space-y-5">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-oled-border pb-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-1.5 h-4 bg-emerald-400 rounded-full"></span>
+                                <h2 class="text-sm font-semibold text-white">거리 감쇄 & 앰프 출력(dB) 계산</h2>
+                            </div>
+                            <span class="text-[10px] font-mono text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 rounded">SPL & POWER</span>
+                        </div>
+
+                        <!-- Inverse Square Law -->
+                        <div class="space-y-2.5">
+                            <span class="text-xs font-medium text-zinc-300 block">① 거리에 따른 음압(dB SPL) 감쇄 (역자승 법칙)</span>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div>
+                                    <label class="block text-[10px] font-mono text-zinc-500 mb-1">REF SPL(dB)</label>
+                                    <input type="number" id="splRefInput" value="105" oninput="calculateAcoustics()"
+                                        class="w-full pro-input px-2.5 py-1.5 font-mono text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-mono text-zinc-500 mb-1">DIST D1(m)</label>
+                                    <input type="number" id="dist1Input" value="1" min="0.1" step="0.5" oninput="calculateAcoustics()"
+                                        class="w-full pro-input px-2.5 py-1.5 font-mono text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-mono text-zinc-500 mb-1">TARGET D2(m)</label>
+                                    <input type="number" id="dist2Input" value="16" min="0.5" step="1" oninput="calculateAcoustics()"
+                                        class="w-full pro-input px-2.5 py-1.5 font-mono text-sm">
+                                </div>
+                            </div>
+                            <div class="oled-readout p-3 flex justify-between items-center font-mono">
+                                <div>
+                                    <span class="text-[10px] text-zinc-500 block">ATTENUATION</span>
+                                    <span id="resSplLoss" class="text-sm font-bold text-rose-400">-24.08 dB</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[10px] text-zinc-500 block">ESTIMATED SPL AT D2</span>
+                                    <span id="resTargetSpl" class="text-lg font-bold text-emerald-400">80.9 dB SPL</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Amplifier Power dB -->
+                        <div class="space-y-2.5 pt-3 border-t border-oled-border">
+                            <span class="text-xs font-medium text-zinc-300 block">② 앰프 전력(W) 배수에 따른 dB 변화량</span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] font-mono text-zinc-500 mb-1">POWER P1 (W)</label>
+                                    <input type="number" id="watt1Input" value="500" min="1" oninput="calculateAcoustics()"
+                                        class="w-full pro-input px-2.5 py-1.5 font-mono text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-mono text-zinc-500 mb-1">POWER P2 (W)</label>
+                                    <input type="number" id="watt2Input" value="1000" min="1" oninput="calculateAcoustics()"
+                                        class="w-full pro-input px-2.5 py-1.5 font-mono text-sm">
+                                </div>
+                            </div>
+                            <div class="oled-readout p-3 flex justify-between items-center font-mono">
+                                <span class="text-[11px] text-zinc-400">GAIN DIFFERENCE</span>
+                                <span id="resWattDb" class="text-base font-bold text-cyan-400">+3.01 dB</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-oled-border text-[11px] font-mono text-zinc-500 space-y-1">
+                        <div>ΔSPL = 20 × log10(D2 / D1)</div>
+                        <div>ΔdB = 10 × log10(P2 / P1)</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- =========================================================
+             TAB 3: 웹 시그널 제너레이터 & 실시간 스펙트럼 RTA
+             ========================================================= -->
+        <section id="tab-signal" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Left: Signal Generator Engine -->
+                <div class="lg:col-span-5 pro-card p-5 flex flex-col justify-between space-y-5">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-oled-border pb-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-1.5 h-4 bg-cyan-400 rounded-full"></span>
+                                <h2 class="text-sm font-semibold text-white">SIGNAL GENERATOR</h2>
+                            </div>
+                            <span id="genActiveBadge" class="text-[11px] font-mono px-2.5 py-0.5 rounded bg-zinc-900 text-zinc-500 border border-zinc-800">MUTED</span>
+                        </div>
+
+                        <!-- Soft Fade-in Notice -->
+                        <div class="oled-readout px-3 py-2 flex items-center space-x-2.5 text-xs text-zinc-300">
+                            <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                            <span>스피커 보호용 <strong>1.5초 소프트 페이드인(Soft Ramp)</strong> 회로 작동 중</span>
+                        </div>
+
+                        <!-- Waveform Selection -->
+                        <div>
+                            <label class="block text-[10px] font-mono uppercase tracking-wider text-zinc-500 mb-2">WAVEFORM / NOISE SOURCE</label>
+                            <div class="grid grid-cols-3 gap-2 font-mono text-xs">
+                                <button onclick="selectSignalType('sine')" id="sigBtn-sine" class="sig-type-btn py-2.5 px-2 rounded-lg border border-cyan-500/80 bg-cyan-500/10 text-cyan-300 font-semibold transition">
+                                    SINE WAVE
+                                </button>
+                                <button onclick="selectSignalType('pink')" id="sigBtn-pink" class="sig-type-btn py-2.5 px-2 rounded-lg border border-oled-border bg-black text-zinc-400 hover:text-zinc-200 font-semibold transition">
+                                    PINK NOISE
+                                </button>
+                                <button onclick="selectSignalType('white')" id="sigBtn-white" class="sig-type-btn py-2.5 px-2 rounded-lg border border-oled-border bg-black text-zinc-400 hover:text-zinc-200 font-semibold transition">
+                                    WHITE NOISE
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- L / C / R Output Panning -->
+                        <div class="flex items-center justify-between oled-readout p-2.5">
+                            <span class="text-[11px] font-mono text-zinc-400 pl-1">OUTPUT ROUTING</span>
+                            <div class="flex gap-1.5 font-mono text-xs">
+                                <button onclick="setPan(-1)" id="panBtn-L" class="pan-btn px-3 py-1 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">LEFT</button>
+                                <button onclick="setPan(0)" id="panBtn-C" class="pan-btn px-3 py-1 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/60">CENTER (L+R)</button>
+                                <button onclick="setPan(1)" id="panBtn-R" class="pan-btn px-3 py-1 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">RIGHT</button>
+                            </div>
+                        </div>
+
+                        <!-- Sine Frequency Controls -->
+                        <div id="sineFreqControlBox" class="oled-readout p-4 space-y-3 transition-opacity">
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">OSCILLATOR FREQUENCY</span>
+                                <div class="flex items-baseline space-x-1">
+                                    <input type="number" id="genFreqInput" value="1000" min="20" max="20000" oninput="updateGenFreq(this.value)"
+                                        class="bg-transparent font-mono text-2xl font-bold text-cyan-400 w-28 text-right focus:outline-none border-b border-zinc-800 focus:border-cyan-400">
+                                    <span class="font-mono text-xs text-zinc-500">Hz</span>
+                                </div>
+                            </div>
+                            <input type="range" id="genFreqSlider" min="20" max="16000" value="1000" oninput="updateGenFreq(this.value)" class="w-full pro-slider">
+                            
+                            <!-- ISO Quick Frequencies -->
+                            <div class="grid grid-cols-5 gap-1.5 pt-1 font-mono text-[11px]">
+                                <button onclick="updateGenFreq(63)" class="py-1 bg-zinc-950 hover:bg-zinc-900 border border-oled-border rounded text-zinc-400">63Hz</button>
+                                <button onclick="updateGenFreq(125)" class="py-1 bg-zinc-950 hover:bg-zinc-900 border border-oled-border rounded text-zinc-400">125Hz</button>
+                                <button onclick="updateGenFreq(250)" class="py-1 bg-zinc-950 hover:bg-zinc-900 border border-oled-border rounded text-zinc-400">250Hz</button>
+                                <button onclick="updateGenFreq(500)" class="py-1 bg-zinc-950 hover:bg-zinc-900 border border-oled-border rounded text-zinc-400">500Hz</button>
+                                <button onclick="updateGenFreq(1000)" class="py-1 bg-cyan-950/40 border border-cyan-500/40 rounded text-cyan-300 font-bold">1kHz</button>
+                                <button onclick="updateGenFreq(2000)" class="py-1 bg-zinc-950 hover:bg-zinc-900 border border-oled-border rounded text-zinc-400">2kHz</button>
+                                <button onclick="updateGenFreq(4000)" class="py-1 bg-zinc-950 hover:bg-zinc-900 border border-oled-border rounded text-zinc-400">4kHz</button>
+                                <button onclick="updateGenFreq(8000)" class="py-1 bg-zinc-950 hover:bg-zinc-900 border border-oled-border rounded text-zinc-400">8kHz</button>
+                                <button onclick="updateGenFreq(12000)" class="py-1 bg-zinc-950 hover:bg-zinc-900 border border-oled-border rounded text-zinc-400">12kHz</button>
+                                <button onclick="updateGenFreq(16000)" class="py-1 bg-zinc-950 hover:bg-zinc-900 border border-oled-border rounded text-zinc-400">16kHz</button>
+                            </div>
+                        </div>
+
+                        <!-- Output Level Fader -->
+                        <div class="space-y-2 pt-1">
+                            <div class="flex justify-between text-xs font-mono">
+                                <span class="text-zinc-400">OUTPUT GAIN (dBFS)</span>
+                                <span id="genDbReadout" class="text-emerald-400 font-bold">-18 dBFS</span>
+                            </div>
+                            <input type="range" id="genGainSlider" min="-60" max="0" step="1" value="-18" oninput="updateGenGain(this.value)" class="w-full pro-slider">
+                        </div>
+                    </div>
+
+                    <!-- Play / Mute Master Switch -->
+                    <button id="genToggleBtn" onclick="toggleSignalGenerator()"
+                        class="w-full py-4 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/60 text-emerald-300 font-mono font-bold text-sm tracking-wider flex items-center justify-center space-x-2.5 transition">
+                        <i id="genToggleIcon" class="fa-solid fa-play text-xs"></i>
+                        <span id="genToggleText">SIGNAL ON (1.5s SOFT FADE-IN)</span>
+                    </button>
+                </div>
+
+                <!-- Right: High-Res FabFilter-Style Real-Time RTA -->
+                <div class="lg:col-span-7 pro-card p-5 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-oled-border pb-3">
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="w-1.5 h-4 bg-emerald-400 rounded-full"></span>
+                                    <h2 class="text-sm font-semibold text-white">REAL-TIME SPECTRUM ANALYZER (RTA)</h2>
+                                </div>
+                                <p class="text-xs text-zinc-400 mt-0.5">그래프 위에 마우스를 올리면 정확한 주파수(Hz)와 상대 레벨(dB)을 추적합니다.</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button id="micRtaBtn" onclick="toggleMicRta()" class="px-3 py-1.5 rounded-lg bg-black hover:bg-zinc-900 border border-oled-border text-xs font-mono text-zinc-300 flex items-center gap-2 transition">
+                                    <span id="micDot" class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                    <span id="micRtaText">MIC RTA INPUT</span>
+                                </button>
+                                <button onclick="resetPeakHold()" class="px-2.5 py-1.5 rounded-lg bg-black hover:bg-zinc-900 border border-oled-border text-xs font-mono text-zinc-400">
+                                    PEAK RESET
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Pure Black RTA Canvas Container -->
+                        <div class="relative oled-readout overflow-hidden h-80 w-full">
+                            <canvas id="rtaCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+                            <!-- Floating HUD Readout -->
+                            <div class="absolute top-3 left-3 bg-black/85 backdrop-blur border border-oled-border px-3 py-1.5 rounded-md text-[11px] font-mono pointer-events-none flex items-center space-x-4">
+                                <div>
+                                    <span class="text-zinc-500">SOURCE:</span>
+                                    <span id="rtaSourceLabel" class="text-cyan-400 font-semibold ml-1">INTERNAL GEN</span>
+                                </div>
+                                <div>
+                                    <span class="text-zinc-500">PEAK:</span>
+                                    <span id="rtaPeakFreqLabel" class="text-amber-400 font-semibold ml-1">--- Hz</span>
+                                </div>
+                                <div>
+                                    <span class="text-zinc-500">CURSOR:</span>
+                                    <span id="rtaCursorFreq" class="text-emerald-400 font-semibold ml-1">--- Hz</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Frequency Reference Strip -->
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-[11px] font-mono">
+                        <div class="oled-readout p-2.5">
+                            <span class="text-amber-400 font-bold block">60 – 120 Hz</span>
+                            <span class="text-zinc-500 font-sans text-[11px]">킥·베이스 펀치 / 룸 부밍</span>
+                        </div>
+                        <div class="oled-readout p-2.5">
+                            <span class="text-amber-400 font-bold block">200 – 400 Hz</span>
+                            <span class="text-zinc-500 font-sans text-[11px]">먹먹함(Mud) / 통울림</span>
+                        </div>
+                        <div class="oled-readout p-2.5">
+                            <span class="text-cyan-400 font-bold block">800 – 1.2k Hz</span>
+                            <span class="text-zinc-500 font-sans text-[11px]">보컬 코맹맹이 / 혼 공진</span>
+                        </div>
+                        <div class="oled-readout p-2.5">
+                            <span class="text-emerald-400 font-bold block">2.5k – 4k Hz</span>
+                            <span class="text-zinc-500 font-sans text-[11px]">어택·명료도 / 주 하울링</span>
+                        </div>
+                        <div class="oled-readout p-2.5 col-span-2 sm:col-span-1">
+                            <span class="text-purple-400 font-bold block">6k – 12k Hz</span>
+                            <span class="text-zinc-500 font-sans text-[11px]">치찰음(Sibilance) / 에어</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- =========================================================
+             TAB 4: 패치 시트 · 220V 전원 계산 · 케이블 핀배열
+             ========================================================= -->
+        <section id="tab-patch" class="tab-content hidden space-y-6">
+            
+            <!-- 1. Console Scribble-Strip Style Input Patch Sheet -->
+            <div class="pro-card p-5 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-oled-border pb-3">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="w-1.5 h-4 bg-amber-400 rounded-full"></span>
+                            <h2 class="text-sm font-semibold text-white">INPUT PATCH SHEET & SCRIBBLE STRIP</h2>
+                        </div>
+                        <p class="text-xs text-zinc-400 mt-0.5">모든 채널 패치와 +48V 팬텀파워 상태는 `localStorage`에 실시간 자동 저장됩니다.</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 no-print font-mono text-xs">
+                        <button onclick="loadPatchPreset('band')" class="px-3 py-1.5 rounded-lg bg-black hover:bg-zinc-900 border border-oled-border text-amber-400">
+                            PRESET: LIVE BAND
+                        </button>
+                        <button onclick="loadPatchPreset('conference')" class="px-3 py-1.5 rounded-lg bg-black hover:bg-zinc-900 border border-oled-border text-cyan-400">
+                            PRESET: CONFERENCE
+                        </button>
+                        <button onclick="exportPatchCSV()" class="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/40 text-emerald-300">
+                            <i class="fa-solid fa-download mr-1"></i>CSV
+                        </button>
+                        <button onclick="window.print()" class="px-3 py-1.5 rounded-lg bg-black hover:bg-zinc-900 border border-oled-border text-zinc-300">
+                            <i class="fa-solid fa-print mr-1"></i>PRINT
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Add Channel Row -->
+                <div class="grid grid-cols-2 sm:grid-cols-7 gap-2 oled-readout p-3 no-print">
+                    <div>
+                        <label class="block text-[10px] font-mono text-zinc-500 mb-1">CH</label>
+                        <input type="number" id="newPatchCh" value="1" min="1" max="96" class="w-full pro-input px-2.5 py-1.5 text-xs font-mono">
+                    </div>
+                    <div class="col-span-1 sm:col-span-2">
+                        <label class="block text-[10px] font-mono text-zinc-500 mb-1">SOURCE LABEL</label>
+                        <input type="text" id="newPatchName" placeholder="Kick In, Lead Vocal..." class="w-full pro-input px-2.5 py-1.5 text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-mono text-zinc-500 mb-1">MIC / DI MODEL</label>
+                        <input type="text" id="newPatchMic" placeholder="Beta 52A, J48..." class="w-full pro-input px-2.5 py-1.5 text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-mono text-zinc-500 mb-1">STAGEBOX PORT</label>
+                        <input type="text" id="newPatchPort" placeholder="DL32-01" class="w-full pro-input px-2.5 py-1.5 text-xs font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-mono text-zinc-500 mb-1">COLOR & +48V</label>
+                        <div class="flex gap-1.5">
+                            <select id="newPatchColor" class="pro-input px-2 py-1.5 text-xs flex-1">
+                                <option value="Red">Red (Drums)</option>
+                                <option value="Yellow">Yellow (Bass/Gtr)</option>
+                                <option value="Green">Green (Keys/Ac)</option>
+                                <option value="Cyan">Cyan (Vocals)</option>
+                                <option value="Magenta">Magenta (MC/RF)</option>
+                                <option value="White">White (Playback)</option>
+                            </select>
+                            <label class="flex items-center space-x-1 pro-input px-2 text-xs text-rose-400 font-mono cursor-pointer">
+                                <input type="checkbox" id="newPatch48v" class="accent-rose-500">
+                                <span>48V</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-span-2 sm:col-span-1 flex items-end">
+                        <button onclick="addPatchRow()" class="w-full py-1.5 bg-cyan-500 hover:bg-cyan-400 text-black font-mono font-bold text-xs rounded-lg transition">
+                            + ADD CH
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Patch Table -->
+                <div class="overflow-x-auto rounded-lg border border-oled-border bg-black">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-oled-surface text-zinc-500 text-[11px] font-mono uppercase border-b border-oled-border">
+                                <th class="py-2.5 px-3 w-20">CH</th>
+                                <th class="py-2.5 px-3 w-28">STRIP COLOR</th>
+                                <th class="py-2.5 px-3">INSTRUMENT / LABEL</th>
+                                <th class="py-2.5 px-3">MIC / DI MODEL</th>
+                                <th class="py-2.5 px-3">STAGE PORT</th>
+                                <th class="py-2.5 px-3 text-center">PHANTOM</th>
+                                <th class="py-2.5 px-3 text-right no-print">DEL</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patchTableBody" class="divide-y divide-oled-border text-xs sm:text-sm">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 2. 220V Power Load Calculator & Modern Cable Pinout Diagrams -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 no-print">
+                
+                <!-- 220V Single-Phase Power & Breaker Calculator -->
+                <div class="lg:col-span-5 pro-card p-5 flex flex-col justify-between space-y-4">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-oled-border pb-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-1.5 h-4 bg-emerald-400 rounded-full"></span>
+                                <h2 class="text-sm font-semibold text-white">220V 전원 & 차단기 부하 계산기</h2>
+                            </div>
+                            <!-- Breaker Rating Selector (15A / 20A / 30A) -->
+                            <div class="flex items-center space-x-1 font-mono text-[11px]">
+                                <button onclick="setBreakerCap(15)" id="brk-15" class="brk-btn px-2 py-0.5 rounded bg-black border border-oled-border text-zinc-400">15A</button>
+                                <button onclick="setBreakerCap(20)" id="brk-20" class="brk-btn px-2 py-0.5 rounded bg-cyan-500/20 border border-cyan-500/60 text-cyan-300 font-bold">20A</button>
+                                <button onclick="setBreakerCap(30)" id="brk-30" class="brk-btn px-2 py-0.5 rounded bg-black border border-oled-border text-zinc-400">30A</button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Add Equipment -->
+                        <div class="flex flex-wrap gap-1.5 font-mono text-[11px]">
+                            <button onclick="addPowerItem('Active Subwoofer (18\")', 1200)" class="px-2.5 py-1 bg-black hover:bg-zinc-900 border border-oled-border rounded text-zinc-300">+ Sub (1200W)</button>
+                            <button onclick="addPowerItem('Active Top Speaker (15\")', 600)" class="px-2.5 py-1 bg-black hover:bg-zinc-900 border border-oled-border rounded text-zinc-300">+ Top (600W)</button>
+                            <button onclick="addPowerItem('Stage Monitor Wedge', 350)" class="px-2.5 py-1 bg-black hover:bg-zinc-900 border border-oled-border rounded text-zinc-300">+ Wedge (350W)</button>
+                            <button onclick="addPowerItem('FOH Console + Rack', 250)" class="px-2.5 py-1 bg-black hover:bg-zinc-900 border border-oled-border rounded text-zinc-300">+ Console (250W)</button>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <input type="text" id="powerNameInput" placeholder="장비명 입력..." class="flex-1 pro-input px-3 py-1.5 text-xs">
+                            <input type="number" id="powerWattInput" placeholder="W" value="500" min="10" class="w-24 pro-input px-2.5 py-1.5 text-xs font-mono">
+                            <button onclick="addCustomPowerItem()" class="px-3 py-1.5 bg-zinc-100 hover:bg-white text-black font-mono text-xs font-bold rounded-lg transition">ADD</button>
+                        </div>
+
+                        <!-- Equipment List -->
+                        <div id="powerItemsList" class="max-h-36 overflow-y-auto space-y-1.5 pr-1">
+                            <!-- Populated by JS -->
+                        </div>
+
+                        <!-- OLED Load Readout -->
+                        <div class="oled-readout p-4 space-y-3 font-mono">
+                            <div class="flex justify-between items-baseline">
+                                <div>
+                                    <span class="text-[10px] text-zinc-500 block">TOTAL POWER CONSUMPTION</span>
+                                    <span id="totalWattsLabel" class="text-2xl font-bold text-white">2,850 W</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[10px] text-zinc-500 block">CURRENT DRAW (220V)</span>
+                                    <span id="totalAmpsLabel" class="text-2xl font-bold text-amber-400">12.95 A</span>
+                                </div>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <div class="flex justify-between text-[11px]">
+                                    <span id="breakerCapLabel" class="text-zinc-500">20A BREAKER LOAD (80% SAFE LIMIT)</span>
+                                    <span id="breakerStatusText" class="text-emerald-400 font-bold">65% (SAFE)</span>
+                                </div>
+                                <div class="w-full h-2 bg-zinc-900 rounded-full overflow-hidden">
+                                    <div id="breakerBar" class="h-full bg-emerald-400 transition-all duration-300" style="width: 65%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-[11px] font-mono text-zinc-500 border-t border-oled-border pt-2 flex justify-between">
+                        <span>Formula: I(A) = P(W) / 220V</span>
+                        <span>Continuous Safe Limit: 80%</span>
+                    </div>
+                </div>
+
+                <!-- Modern Cable Pinout Diagrams -->
+                <div class="lg:col-span-7 pro-card p-5 space-y-4">
+                    <div class="border-b border-oled-border pb-3 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-1.5 h-4 bg-cyan-400 rounded-full"></span>
+                            <h2 class="text-sm font-semibold text-white">PRO AUDIO CABLE PINOUT REFERENCE</h2>
+                        </div>
+                        <span class="text-[10px] font-mono text-zinc-500">IEC / AES STANDARD</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <!-- 1. XLR Balanced -->
+                        <div class="oled-readout p-3.5 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-mono font-bold text-white">1. XLR BALANCED</span>
+                                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-900 text-cyan-400 border border-zinc-800">AES14 STANDARD</span>
+                            </div>
+                            <div class="flex items-center space-x-3 pt-1">
+                                <svg class="w-12 h-12 shrink-0" viewBox="0 0 48 48" fill="none">
+                                    <circle cx="24" cy="24" r="21" stroke="#3f3f46" stroke-width="1.5"/>
+                                    <circle cx="16" cy="20" r="3.5" fill="#71717a"/>
+                                    <circle cx="32" cy="20" r="3.5" fill="#f43f5e"/>
+                                    <circle cx="24" cy="32" r="3.5" fill="#06b6d4"/>
+                                    <text x="14" y="13" fill="#a1a1aa" font-size="7" font-family="monospace">1</text>
+                                    <text x="30" y="13" fill="#f43f5e" font-size="7" font-family="monospace">2</text>
+                                    <text x="22" y="42" fill="#06b6d4" font-size="7" font-family="monospace">3</text>
+                                </svg>
+                                <ul class="space-y-1 font-mono text-[11px] text-zinc-300">
+                                    <li><span class="text-zinc-500">PIN 1:</span> GND / Shield (접지)</li>
+                                    <li><span class="text-rose-400">PIN 2:</span> HOT (+ 정위상 신호)</li>
+                                    <li><span class="text-cyan-400">PIN 3:</span> COLD (- 역위상 신호)</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 2. TRS Balanced & TS Unbalanced -->
+                        <div class="oled-readout p-3.5 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-mono font-bold text-white">2. TRS BALANCED / TS UNBAL</span>
+                                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-900 text-amber-400 border border-zinc-800">1/4" (55) & 3.5mm</span>
+                            </div>
+                            <ul class="space-y-1 font-mono text-[11px] text-zinc-300 pt-1">
+                                <li><span class="text-rose-400">TIP (팁):</span> HOT (+) / Left Ch</li>
+                                <li><span class="text-cyan-400">RING (링):</span> COLD (-) / Right Ch</li>
+                                <li><span class="text-zinc-500">SLEEVE:</span> GND Shield (TS는 Ring+Sleeve 통합)</li>
+                            </ul>
+                        </div>
+
+                        <!-- 3. Speakon NL4 -->
+                        <div class="oled-readout p-3.5 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-mono font-bold text-white">3. SPEAKON (NL4FX)</span>
+                                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-900 text-emerald-400 border border-zinc-800">PASSIVE PA / BI-AMP</span>
+                            </div>
+                            <ul class="space-y-1 font-mono text-[11px] text-zinc-300 pt-1">
+                                <li><span class="text-emerald-400">1+ / 1- :</span> Full-Range 또는 Low Sub (+ / -)</li>
+                                <li><span class="text-amber-400">2+ / 2- :</span> High Driver (Bi-Amp) 또는 Sub Link</li>
+                                <li class="text-zinc-500 font-sans text-[11px]">※ 2심 스피커 케이블은 반드시 1+(적), 1-(흑)에 결선</li>
+                            </ul>
+                        </div>
+
+                        <!-- 4. Y-Cable (TRS Stereo Breakout) -->
+                        <div class="oled-readout p-3.5 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-mono font-bold text-white">4. Y-CABLE (TRS → DUAL TS/XLR)</span>
+                                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-900 text-rose-400 border border-zinc-800">NO +48V WARNING</span>
+                            </div>
+                            <ul class="space-y-1 font-mono text-[11px] text-zinc-300 pt-1">
+                                <li><span class="text-rose-400">TRS TIP:</span> Left TS Tip (또는 XLR Pin 2)</li>
+                                <li><span class="text-cyan-400">TRS RING:</span> Right TS Tip (또는 XLR Pin 2)</li>
+                                <li><span class="text-zinc-500">TRS SLEEVE:</span> 양쪽 Sleeve (XLR Pin 1+3 점프)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Minimal Footer -->
+    <footer class="border-t border-oled-border py-4 mt-8 bg-oled-black no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between text-[11px] font-mono text-zinc-600 gap-2">
+            <div>FOH MASTER PRO // PURE OLED BLACK EDITION (#000000)</div>
+            <div>AUTO-SAVED TO LOCALSTORAGE · [SPACE] TAP TEMPO</div>
+        </div>
+    </footer>
+
+    <!-- =========================================================
+         APPLICATION JAVASCRIPT
+         ========================================================= -->
+    <script>
+        const STORAGE_KEY = 'foh_master_oled_v2';
+        let appState = {
+            bpm: 120,
+            delayDist: 15,
+            delayTemp: 22,
+            waveFreq: 80,
+            splRef: 105,
+            dist1: 1,
+            dist2: 16,
+            watt1: 500,
+            watt2: 1000,
+            breakerCap: 20,
+            patchList: [],
+            powerList: [
+                { id: 1, name: 'Active Subwoofer (18") ×2', watts: 1600 },
+                { id: 2, name: 'Active Top Speaker (15") ×2', watts: 1000 },
+                { id: 3, name: 'FOH Digital Console & Stagebox', watts: 250 }
+            ]
+        };
+
+        const PRESET_BAND = [
+            { ch: 1, color: 'Red', name: 'Kick In', mic: 'Beta 91A', port: 'DL32-01', p48: true },
+            { ch: 2, color: 'Red', name: 'Kick Out', mic: 'Beta 52A', port: 'DL32-02', p48: false },
+            { ch: 3, color: 'Red', name: 'Snare Top', mic: 'SM57', port: 'DL32-03', p48: false },
+            { ch: 4, color: 'Red', name: 'Snare Bottom', mic: 'SM57', port: 'DL32-04', p48: false },
+            { ch: 5, color: 'Red', name: 'Hi-Hat', mic: 'SM81', port: 'DL32-05', p48: true },
+            { ch: 6, color: 'Red', name: 'Rack Tom', mic: 'e604', port: 'DL32-06', p48: false },
+            { ch: 7, color: 'Red', name: 'Floor Tom', mic: 'e604', port: 'DL32-07', p48: false },
+            { ch: 8, color: 'Red', name: 'Overheads L/R', mic: 'C414 Pair', port: 'DL32-08/09', p48: true },
+            { ch: 9, color: 'Yellow', name: 'Bass DI', mic: 'Radial J48', port: 'DL32-10', p48: true },
+            { ch: 10, color: 'Yellow', name: 'Elec Guitar', mic: 'e906 / SM57', port: 'DL32-11', p48: false },
+            { ch: 11, color: 'Green', name: 'Acoustic DI', mic: 'Radial Pro48', port: 'DL32-12', p48: true },
+            { ch: 12, color: 'Green', name: 'Main Keys L/R', mic: 'Radial ProD2', port: 'DL32-13/14', p48: false },
+            { ch: 13, color: 'Cyan', name: 'Lead Vocal', mic: 'Beta 58A', port: 'DL32-15', p48: false },
+            { ch: 14, color: 'Cyan', name: 'Backing Vocal', mic: 'SM58', port: 'DL32-16', p48: false }
+        ];
+
+        const PRESET_CONFERENCE = [
+            { ch: 1, color: 'Magenta', name: 'Podium Gooseneck 1', mic: 'MX418', port: 'Stage-01', p48: true },
+            { ch: 2, color: 'Magenta', name: 'Podium Gooseneck 2', mic: 'MX418', port: 'Stage-02', p48: true },
+            { ch: 3, color: 'Cyan', name: 'MC Wireless Handheld 1', mic: 'ULXD2 / B58', port: 'Local-01', p48: false },
+            { ch: 4, color: 'Cyan', name: 'Presenter Handheld 2', mic: 'ULXD2 / B58', port: 'Local-02', p48: false },
+            { ch: 5, color: 'Cyan', name: 'Wireless Lavalier 1', mic: 'ULXD1 Belt', port: 'Local-03', p48: false },
+            { ch: 6, color: 'Green', name: 'Laptop HDMI Audio L/R', mic: 'Stereo DI', port: 'FOH-Aux 1/2', p48: false },
+            { ch: 7, color: 'White', name: 'BGM Playback L/R', mic: 'USB / Aux', port: 'FOH-Aux 3/4', p48: false }
+        ];
+
+        window.onload = function () {
+            loadStateFromStorage();
+            initClock();
+            renderBpmModule();
+            calculateAcoustics();
+            renderPatchTable();
+            setBreakerCap(appState.breakerCap || 20);
+            initRtaCanvas();
+
+            window.addEventListener('keydown', (e) => {
+                const activeTab = document.getElementById('tab-bpm');
+                const tag = document.activeElement.tagName.toLowerCase();
+                if (!activeTab.classList.contains('hidden') && e.code === 'Space' && tag !== 'input') {
+                    e.preventDefault();
+                    registerTap();
+                }
+            });
+        };
+
+        function loadStateFromStorage() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    appState = { ...appState, ...JSON.parse(saved) };
+                } else {
+                    appState.patchList = JSON.parse(JSON.stringify(PRESET_BAND));
+                }
+            } catch (e) {
+                appState.patchList = JSON.parse(JSON.stringify(PRESET_BAND));
+            }
+
+            document.getElementById('bpmInput').value = appState.bpm;
+            document.getElementById('bpmSlider').value = appState.bpm;
+            document.getElementById('delayDistInput').value = appState.delayDist;
+            document.getElementById('delayTempInput').value = appState.delayTemp;
+            document.getElementById('waveFreqInput').value = appState.waveFreq;
+            document.getElementById('splRefInput').value = appState.splRef;
+            document.getElementById('dist1Input').value = appState.dist1;
+            document.getElementById('dist2Input').value = appState.dist2;
+            document.getElementById('watt1Input').value = appState.watt1;
+            document.getElementById('watt2Input').value = appState.watt2;
+        }
+
+        function saveStateToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            } catch (e) {}
+        }
+
+        function resetAllData() {
+            localStorage.removeItem(STORAGE_KEY);
+            appState.bpm = 120;
+            appState.breakerCap = 20;
+            appState.patchList = JSON.parse(JSON.stringify(PRESET_BAND));
+            loadStateFromStorage();
+            renderBpmModule();
+            calculateAcoustics();
+            renderPatchTable();
+            setBreakerCap(20);
+            showToast('FACTORY DEFAULT RESTORED');
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('border-cyan-400', 'text-white');
+                btn.classList.add('border-transparent', 'text-zinc-500');
+                btn.querySelector('span:first-child').className = 'font-mono text-[11px] text-zinc-600';
+            });
+
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.remove('border-transparent', 'text-zinc-500');
+            activeBtn.classList.add('border-cyan-400', 'text-white');
+            activeBtn.querySelector('span:first-child').className = 'font-mono text-[11px] text-cyan-400';
+
+            if (tabId === 'tab-signal') {
+                resizeRtaCanvas();
+            }
+        }
+
+        function copyText(text) {
+            const clean = String(text).replace(/[^0-9.]/g, '');
+            const toCopy = clean || text;
+            const tempInput = document.createElement('textarea');
+            tempInput.value = toCopy;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast(`COPIED: ${toCopy}`);
+        }
+
+        let toastTimer = null;
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('hidden');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.add('hidden'), 2000);
+        }
+
+        function initClock() {
+            const update = () => {
+                document.getElementById('liveClock').innerText = new Date().toTimeString().split(' ')[0];
+            };
+            update();
+            setInterval(update, 1000);
+        }
+
+        let wakeLockSentinel = null;
+        async function toggleWakeLock() {
+            const dot = document.getElementById('wakeLockDot');
+            const text = document.getElementById('wakeLockText');
+            if (!('wakeLock' in navigator)) {
+                showToast('WAKE LOCK API NOT SUPPORTED');
+                return;
+            }
+            try {
+                if (!wakeLockSentinel) {
+                    wakeLockSentinel = await navigator.wakeLock.request('screen');
+                    dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400';
+                    text.innerText = 'WAKE LOCK: ON';
+                    showToast('SCREEN WAKE LOCK ACTIVE');
+                    wakeLockSentinel.addEventListener('release', () => {
+                        wakeLockSentinel = null;
+                        dot.className = 'w-1.5 h-1.5 rounded-full bg-zinc-600';
+                        text.innerText = 'WAKE LOCK: OFF';
+                    });
+                } else {
+                    await wakeLockSentinel.release();
+                    wakeLockSentinel = null;
+                }
+            } catch (e) {
+                showToast('WAKE LOCK FAILED');
+            }
+        }
+
+        // =========================================================
+        // TAB 1: BPM, Reverb & Delay Calculations
+        // =========================================================
+        let tapTimestamps = [];
+        let tapResetTimeout = null;
+
+        function registerTap(e) {
+            if (e && e.type === 'touchstart') e.preventDefault();
+            const now = performance.now();
+            const btn = document.getElementById('tapTempoBtn');
+            const badge = document.getElementById('tapStatusBadge');
+
+            btn.classList.add('tap-pulse');
+            setTimeout(() => btn.classList.remove('tap-pulse'), 110);
+
+            if (tapTimestamps.length > 0 && (now - tapTimestamps[tapTimestamps.length - 1]) > 3000) {
+                tapTimestamps = [];
+            }
+
+            tapTimestamps.push(now);
+            if (tapTimestamps.length > 8) tapTimestamps.shift();
+
+            if (tapTimestamps.length >= 2) {
+                let intervals = [];
+                for (let i = 1; i < tapTimestamps.length; i++) {
+                    intervals.push(tapTimestamps[i] - tapTimestamps[i - 1]);
+                }
+                const avgMs = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+                const calcBpm = Math.min(300, Math.max(30, +(60000 / avgMs).toFixed(1)));
+                badge.innerText = `TAPPING (${tapTimestamps.length})`;
+                badge.className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/40';
+                handleBpmChange(calcBpm);
+            } else {
+                badge.innerText = 'FIRST TAP';
+                badge.className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-400 border border-cyan-500/40';
+            }
+
+            if (tapResetTimeout) clearTimeout(tapResetTimeout);
+            tapResetTimeout = setTimeout(() => {
+                tapTimestamps = [];
+                badge.innerText = 'STANDBY';
+                badge.className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-zinc-900 text-zinc-500 border border-zinc-800';
+            }, 3000);
+        }
+
+        function nudgeBpm(delta) {
+            let next = parseFloat(appState.bpm) + delta;
+            next = Math.min(300, Math.max(30, Math.round(next * 10) / 10));
+            handleBpmChange(next);
+        }
+
+        function handleBpmChange(val) {
+            const bpm = parseFloat(val);
+            if (isNaN(bpm) || bpm < 20 || bpm > 350) return;
+            appState.bpm = bpm;
+            document.getElementById('bpmInput').value = bpm;
+            document.getElementById('bpmSlider').value = Math.min(240, Math.max(40, bpm));
+            saveStateToStorage();
+            renderBpmModule();
+        }
+
+        function renderBpmModule() {
+            const bpm = parseFloat(appState.bpm) || 120;
+            const quarterMs = 60000 / bpm;
+            const quarterHz = 1000 / quarterMs;
+
+            document.getElementById('quarterNoteHero').innerText = `${quarterMs.toFixed(1)} ms`;
+            document.getElementById('quarterFreqHero').innerText = `${quarterHz.toFixed(2)} Hz`;
+
+            const n64 = quarterMs / 16;
+            const n32 = quarterMs / 8;
+            const n16 = quarterMs / 4;
+            const bar1 = quarterMs * 4;
+            const barHalf = quarterMs * 2;
+
+            const reverbPresets = [
+                {
+                    title: '보컬 발라드 Hall (Vocal Ballad)',
+                    desc: '넓은 공간감 · 1 Bar(4박) 기준 잔향',
+                    preLabel: '1/32 Note',
+                    preMs: n32,
+                    totalLabel: '1 Bar - Pre',
+                    decayMs: bar1 - n32
+                },
+                {
+                    title: '팝 / 록 보컬 Plate (Pop/Rock Vocal)',
+                    desc: '선명한 보컬 프레즌스 · 1/2 Bar(2박) 기준',
+                    preLabel: '1/64 Note',
+                    preMs: n64,
+                    totalLabel: '1/2 Bar - Pre',
+                    decayMs: barHalf - n64
+                },
+                {
+                    title: '스네어 드럼 Room (Snare / Perc)',
+                    desc: '다음 4분음표 백비트 전에 깔끔히 감쇄',
+                    preLabel: '1/64 Note',
+                    preMs: n64,
+                    totalLabel: '1/4 Note - Pre',
+                    decayMs: quarterMs - n64
+                },
+                {
+                    title: '어쿠스틱 악기 Chamber (Acoustic)',
+                    desc: '원음 분리도가 뛰어난 넉넉한 프리딜레이',
+                    preLabel: '1/16 Note',
+                    preMs: n16,
+                    totalLabel: '1/2 Bar - Pre',
+                    decayMs: barHalf - n16
+                }
+            ];
+
+            document.getElementById('reverbPresetCards').innerHTML = reverbPresets.map(p => {
+                const decaySec = (p.decayMs / 1000).toFixed(2);
+                return `
+                    <div class="oled-readout p-3.5 flex flex-col justify-between hover:border-zinc-700 transition">
+                        <div>
+                            <div class="font-semibold text-xs sm:text-sm text-white">${p.title}</div>
+                            <p class="text-[11px] text-zinc-500 mt-0.5 mb-3">${p.desc}</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 pt-2.5 border-t border-oled-border font-mono">
+                            <div onclick="copyText('${p.preMs.toFixed(1)}')" class="copy-cell p-2 rounded bg-oled-surface border border-oled-border">
+                                <span class="text-[10px] text-zinc-500 block">PRE-DELAY (${p.preLabel})</span>
+                                <span class="text-sm font-bold text-amber-400 mt-0.5 block">${p.preMs.toFixed(1)} ms</span>
+                            </div>
+                            <div onclick="copyText('${decaySec}')" class="copy-cell p-2 rounded bg-oled-surface border border-oled-border">
+                                <span class="text-[10px] text-zinc-500 block">DECAY RT60 (${p.totalLabel})</span>
+                                <span class="text-sm font-bold text-cyan-400 mt-0.5 block">${decaySec} s <span class="text-[10px] text-zinc-500 font-normal">(${Math.round(p.decayMs)}ms)</span></span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const notes = [
+                { name: '1 Bar (온음표 / 4박)', mult: 4, tip: '앰비언트 스웰, 긴 공간계 피드백' },
+                { name: '1/2 Note (2분음표)', mult: 2, tip: '발라드 보컬 롱 테일 딜레이' },
+                { name: '1/4 Note (4분음표)', mult: 1, tip: '보컬/악기 표준 정박 에코 딜레이' },
+                { name: '1/8 Note (8분음표)', mult: 0.5, tip: '점8분(Dotted)은 모던 록/워십 필수 세팅' },
+                { name: '1/16 Note (16분음표)', mult: 0.25, tip: '슬랩백(Slapback) 더블링, 리버브 긴 Pre-Delay' },
+                { name: '1/32 Note (32분음표)', mult: 0.125, tip: '보컬 리버브 표준 Pre-Delay' },
+                { name: '1/64 Note (64분음표)', mult: 0.0625, tip: '드럼 리버브 짧은 Pre-Delay, 코러스' }
+            ];
+
+            document.getElementById('delayTableBody').innerHTML = notes.map(n => {
+                const norm = quarterMs * n.mult;
+                const dot = norm * 1.5;
+                const trip = norm * (2 / 3);
+                return `
+                    <tr class="hover:bg-oled-surface transition">
+                        <td class="py-3 px-4 font-sans font-medium text-zinc-200 whitespace-nowrap">${n.name}</td>
+                        <td onclick="copyText('${norm.toFixed(1)}')" class="py-3 px-4 copy-cell">
+                            <span class="text-amber-400 font-semibold">${norm.toFixed(1)} ms</span>
+                            <span class="block text-[10px] text-zinc-500">${(1000 / norm).toFixed(2)} Hz</span>
+                        </td>
+                        <td onclick="copyText('${dot.toFixed(1)}')" class="py-3 px-4 copy-cell">
+                            <span class="text-cyan-400 font-semibold">${dot.toFixed(1)} ms</span>
+                            <span class="block text-[10px] text-zinc-500">${(1000 / dot).toFixed(2)} Hz</span>
+                        </td>
+                        <td onclick="copyText('${trip.toFixed(1)}')" class="py-3 px-4 copy-cell">
+                            <span class="text-emerald-400 font-semibold">${trip.toFixed(1)} ms</span>
+                            <span class="block text-[10px] text-zinc-500">${(1000 / trip).toFixed(2)} Hz</span>
+                        </td>
+                        <td class="py-3 px-4 font-sans text-xs text-zinc-500">${n.tip}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // =========================================================
+        // TAB 2: Acoustic Physics & Speaker Alignment
+        // =========================================================
+        function setDelayDist(m) {
+            document.getElementById('delayDistInput').value = m;
+            calculateAcoustics();
+        }
+
+        function setWaveFreq(hz) {
+            document.getElementById('waveFreqInput').value = hz;
+            calculateAcoustics();
+        }
+
+        function calculateAcoustics() {
+            const dist = parseFloat(document.getElementById('delayDistInput').value) || 0;
+            const temp = parseFloat(document.getElementById('delayTempInput').value) || 20;
+            const freq = parseFloat(document.getElementById('waveFreqInput').value) || 100;
+            const splRef = parseFloat(document.getElementById('splRefInput').value) || 100;
+            const d1 = Math.max(0.1, parseFloat(document.getElementById('dist1Input').value) || 1);
+            const d2 = Math.max(0.1, parseFloat(document.getElementById('dist2Input').value) || 10);
+            const w1 = Math.max(1, parseFloat(document.getElementById('watt1Input').value) || 500);
+            const w2 = Math.max(1, parseFloat(document.getElementById('watt2Input').value) || 1000);
+
+            appState = { ...appState, delayDist: dist, delayTemp: temp, waveFreq: freq, splRef, dist1: d1, dist2: d2, watt1: w1, watt2: w2 };
+            saveStateToStorage();
+
+            const speed = 331.5 + (0.6 * temp);
+            const delayMs = (dist / speed) * 1000;
+            document.getElementById('resSoundSpeed').innerText = `${speed.toFixed(1)} m/s`;
+            document.getElementById('resDelayMs').innerText = `${delayMs.toFixed(2)} ms`;
+            document.getElementById('resHaasDelay').innerText = `${(delayMs + 15).toFixed(2)} ms`;
+
+            const fullWave = speed / freq;
+            const fmtWave = (m) => m >= 1 ? `${m.toFixed(2)} m (${Math.round(m * 100)} cm)` : `${(m * 100).toFixed(1)} cm`;
+            document.getElementById('resWaveFull').innerText = fmtWave(fullWave);
+            document.getElementById('resWaveHalf').innerText = fmtWave(fullWave / 2);
+            document.getElementById('resWaveQuarter').innerText = fmtWave(fullWave / 4);
+            document.getElementById('resWavePeriod').innerText = `${(1000 / freq).toFixed(2)} ms`;
+
+            const splLoss = 20 * Math.log10(d2 / d1);
+            document.getElementById('resSplLoss').innerText = `${(-splLoss).toFixed(2)} dB`;
+            document.getElementById('resTargetSpl').innerText = `${(splRef - splLoss).toFixed(1)} dB SPL`;
+
+            const wattDb = 10 * Math.log10(w2 / w1);
+            document.getElementById('resWattDb').innerText = `${wattDb >= 0 ? '+' : ''}${wattDb.toFixed(2)} dB`;
+        }
+
+        // =========================================================
+        // TAB 3: Web Audio Signal Generator & FabFilter-Style RTA
+        // =========================================================
+        let audioCtx = null;
+        let masterGainNode = null;
+        let pannerNode = null;
+        let analyserNode = null;
+        let activeSourceNode = null;
+        let micStream = null;
+        let micSourceNode = null;
+
+        let isGenPlaying = false;
+        let isMicActive = false;
+        let currentSignalType = 'sine';
+        let currentFreq = 1000;
+        let currentGainDb = -18;
+        let currentPan = 0;
+
+        function ensureAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+                masterGainNode = audioCtx.createGain();
+                masterGainNode.gain.value = 0.0001;
+
+                pannerNode = audioCtx.createStereoPanner();
+                pannerNode.pan.value = currentPan;
+
+                analyserNode = audioCtx.createAnalyser();
+                analyserNode.fftSize = 4096;
+                analyserNode.smoothingTimeConstant = 0.84;
+
+                masterGainNode.connect(pannerNode);
+                pannerNode.connect(analyserNode);
+                pannerNode.connect(audioCtx.destination);
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function dbToLinear(db) {
+            return Math.pow(10, db / 20);
+        }
+
+        function createNoiseBuffer(type) {
+            const bufferSize = audioCtx.sampleRate * 3;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = buffer.getChannelData(0);
+
+            if (type === 'white') {
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = (Math.random() * 2 - 1) * 0.5;
+                }
+            } else {
+                let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+                for (let i = 0; i < bufferSize; i++) {
+                    const white = Math.random() * 2 - 1;
+                    b0 = 0.99886 * b0 + white * 0.0555179;
+                    b1 = 0.99332 * b1 + white * 0.0750759;
+                    b2 = 0.96900 * b2 + white * 0.1538520;
+                    b3 = 0.86650 * b3 + white * 0.3104856;
+                    b4 = 0.55000 * b4 + white * 0.5329522;
+                    b5 = -0.7616 * b5 - white * 0.0168980;
+                    output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.04;
+                    b6 = white * 0.115926;
+                }
+            }
+            return buffer;
+        }
+
+        function startSignalSource() {
+            stopSignalSourceOnly();
+            if (currentSignalType === 'sine') {
+                const osc = audioCtx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(currentFreq, audioCtx.currentTime);
+                osc.connect(masterGainNode);
+                osc.start();
+                activeSourceNode = osc;
+            } else {
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = createNoiseBuffer(currentSignalType);
+                noise.loop = true;
+                noise.connect(masterGainNode);
+                noise.start();
+                activeSourceNode = noise;
+            }
+        }
+
+        function stopSignalSourceOnly() {
+            if (activeSourceNode) {
+                try {
+                    activeSourceNode.stop();
+                    activeSourceNode.disconnect();
+                } catch (e) {}
+                activeSourceNode = null;
+            }
+        }
+
+        function toggleSignalGenerator() {
+            ensureAudioContext();
+            const btn = document.getElementById('genToggleBtn');
+            const icon = document.getElementById('genToggleIcon');
+            const text = document.getElementById('genToggleText');
+            const badge = document.getElementById('genActiveBadge');
+            const now = audioCtx.currentTime;
+
+            if (!isGenPlaying) {
+                isGenPlaying = true;
+                const targetGain = dbToLinear(currentGainDb);
+                masterGainNode.gain.cancelScheduledValues(now);
+                masterGainNode.gain.setValueAtTime(0.0001, now);
+                masterGainNode.gain.linearRampToValueAtTime(targetGain, now + 1.5);
+
+                startSignalSource();
+
+                btn.className = 'w-full py-4 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/60 text-rose-400 font-mono font-bold text-sm tracking-wider flex items-center justify-center space-x-2.5 transition';
+                icon.className = 'fa-solid fa-stop text-xs';
+                text.innerText = 'STOP SIGNAL (SAFE FADE-OUT)';
+                badge.innerText = 'ACTIVE (1.5s RAMP)';
+                badge.className = 'text-[11px] font-mono px-2.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/40';
+            } else {
+                isGenPlaying = false;
+                masterGainNode.gain.cancelScheduledValues(now);
+                masterGainNode.gain.setValueAtTime(masterGainNode.gain.value, now);
+                masterGainNode.gain.linearRampToValueAtTime(0.0001, now + 0.3);
+
+                setTimeout(() => {
+                    if (!isGenPlaying) stopSignalSourceOnly();
+                }, 320);
+
+                btn.className = 'w-full py-4 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/60 text-emerald-300 font-mono font-bold text-sm tracking-wider flex items-center justify-center space-x-2.5 transition';
+                icon.className = 'fa-solid fa-play text-xs';
+                text.innerText = 'SIGNAL ON (1.5s SOFT FADE-IN)';
+                badge.innerText = 'MUTED';
+                badge.className = 'text-[11px] font-mono px-2.5 py-0.5 rounded bg-zinc-900 text-zinc-500 border border-zinc-800';
+            }
+        }
+
+        function selectSignalType(type) {
+            currentSignalType = type;
+            document.querySelectorAll('.sig-type-btn').forEach(b => {
+                b.className = 'sig-type-btn py-2.5 px-2 rounded-lg border border-oled-border bg-black text-zinc-400 hover:text-zinc-200 font-semibold transition';
+            });
+            document.getElementById('sigBtn-' + type).className = 'sig-type-btn py-2.5 px-2 rounded-lg border border-cyan-500/80 bg-cyan-500/10 text-cyan-300 font-semibold transition';
+            document.getElementById('sineFreqControlBox').style.opacity = type === 'sine' ? '1' : '0.35';
+
+            if (isGenPlaying) startSignalSource();
+        }
+
+        function setPan(val) {
+            currentPan = val;
+            if (pannerNode && audioCtx) {
+                pannerNode.pan.setTargetAtTime(val, audioCtx.currentTime, 0.04);
+            }
+            document.querySelectorAll('.pan-btn').forEach(b => {
+                b.className = 'pan-btn px-3 py-1 rounded bg-zinc-900 text-zinc-400 border border-zinc-800';
+            });
+            const id = val === -1 ? 'panBtn-L' : val === 1 ? 'panBtn-R' : 'panBtn-C';
+            document.getElementById(id).className = 'pan-btn px-3 py-1 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/60';
+        }
+
+        function updateGenFreq(hz) {
+            const f = Math.min(20000, Math.max(20, parseFloat(hz) || 1000));
+            currentFreq = f;
+            document.getElementById('genFreqInput').value = f;
+            document.getElementById('genFreqSlider').value = Math.min(16000, f);
+            if (isGenPlaying && currentSignalType === 'sine' && activeSourceNode && activeSourceNode.frequency) {
+                activeSourceNode.frequency.setTargetAtTime(f, audioCtx.currentTime, 0.02);
+            }
+        }
+
+        function updateGenGain(db) {
+            currentGainDb = parseFloat(db);
+            document.getElementById('genDbReadout').innerText = `${currentGainDb} dBFS`;
+            if (isGenPlaying && masterGainNode && audioCtx) {
+                masterGainNode.gain.setTargetAtTime(dbToLinear(currentGainDb), audioCtx.currentTime, 0.06);
+            }
+        }
+
+        async function toggleMicRta() {
+            ensureAudioContext();
+            const btn = document.getElementById('micRtaBtn');
+            const text = document.getElementById('micRtaText');
+            const label = document.getElementById('rtaSourceLabel');
+
+            if (!isMicActive) {
+                try {
+                    micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                    micSourceNode = audioCtx.createMediaStreamSource(micStream);
+                    micSourceNode.connect(analyserNode);
+                    isMicActive = true;
+                    btn.className = 'px-3 py-1.5 rounded-lg bg-rose-500/15 border border-rose-500/60 text-xs font-mono text-rose-300 flex items-center gap-2 transition';
+                    text.innerText = 'MIC RTA: LIVE';
+                    label.innerText = 'MIC INPUT';
+                    showToast('LIVE MICROPHONE RTA ENABLED');
+                } catch (err) {
+                    showToast('MICROPHONE PERMISSION DENIED');
+                }
+            } else {
+                if (micSourceNode) micSourceNode.disconnect();
+                if (micStream) micStream.getTracks().forEach(t => t.stop());
+                isMicActive = false;
+                btn.className = 'px-3 py-1.5 rounded-lg bg-black hover:bg-zinc-900 border border-oled-border text-xs font-mono text-zinc-300 flex items-center gap-2 transition';
+                text.innerText = 'MIC RTA INPUT';
+                label.innerText = 'INTERNAL GEN';
+            }
+        }
+
+        // High-Resolution FabFilter-Style Spectrum Analyzer
+        let rtaCanvas, rtaCtx;
+        const NUM_BANDS = 72;
+        let peakBands = new Float32Array(NUM_BANDS).fill(0);
+        let cursorPos = null;
+
+        function initRtaCanvas() {
+            rtaCanvas = document.getElementById('rtaCanvas');
+            rtaCtx = rtaCanvas.getContext('2d');
+            resizeRtaCanvas();
+            window.addEventListener('resize', resizeRtaCanvas);
+
+            const updateCursor = (e) => {
+                const rect = rtaCanvas.getBoundingClientRect();
+                const cx = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                const cy = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+                cursorPos = { x: cx, y: cy };
+                const ratioX = Math.max(0, Math.min(1, cx / rect.width));
+                const freq = 20 * Math.pow(1000, ratioX);
+                const dbEst = Math.round(((1 - (cy / (rect.height - 22))) * 80) - 80);
+                const freqStr = freq >= 1000 ? `${(freq / 1000).toFixed(2)}kHz` : `${Math.round(freq)}Hz`;
+                document.getElementById('rtaCursorFreq').innerText = `${freqStr} (${dbEst}dB)`;
+            };
+
+            rtaCanvas.addEventListener('mousemove', updateCursor);
+            rtaCanvas.addEventListener('touchmove', updateCursor);
+            rtaCanvas.addEventListener('mouseleave', () => {
+                cursorPos = null;
+                document.getElementById('rtaCursorFreq').innerText = '--- Hz';
+            });
+
+            requestAnimationFrame(drawRtaLoop);
+        }
+
+        function resizeRtaCanvas() {
+            if (!rtaCanvas) return;
+            const rect = rtaCanvas.parentElement.getBoundingClientRect();
+            rtaCanvas.width = rect.width || 640;
+            rtaCanvas.height = rect.height || 320;
+        }
+
+        function resetPeakHold() {
+            peakBands.fill(0);
+            document.getElementById('rtaPeakFreqLabel').innerText = '--- Hz';
+        }
+
+        function drawRtaLoop() {
+            requestAnimationFrame(drawRtaLoop);
+            if (!rtaCtx || !rtaCanvas) return;
+
+            const w = rtaCanvas.width;
+            const h = rtaCanvas.height;
+            const plotH = h - 24;
+
+            rtaCtx.fillStyle = '#000000';
+            rtaCtx.fillRect(0, 0, w, h);
+
+            // Subtle Horizontal & Vertical Log Grid
+            rtaCtx.strokeStyle = '#141417';
+            rtaCtx.lineWidth = 1;
+            for (let i = 1; i <= 4; i++) {
+                const y = (plotH / 5) * i;
+                rtaCtx.beginPath();
+                rtaCtx.moveTo(0, y);
+                rtaCtx.lineTo(w, y);
+                rtaCtx.stroke();
+            }
+
+            const gridFreqs = [31.5, 63, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
+            rtaCtx.fillStyle = '#71717a';
+            rtaCtx.font = '500 10px "Noto Sans Mono", "Noto Sans KR", sans-serif';
+
+            gridFreqs.forEach(f => {
+                const x = (Math.log10(f / 20) / 3) * w;
+                rtaCtx.beginPath();
+                rtaCtx.moveTo(x, 0);
+                rtaCtx.lineTo(x, plotH);
+                rtaCtx.stroke();
+                const label = f >= 1000 ? (f / 1000) + 'k' : f;
+                rtaCtx.fillText(label, x - 9, h - 7);
+            });
+
+            if (analyserNode && (isGenPlaying || isMicActive)) {
+                const bufferLen = analyserNode.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLen);
+                analyserNode.getByteFrequencyData(dataArray);
+
+                const nyquist = audioCtx.sampleRate / 2;
+                let maxVal = 0;
+                let maxFreq = 0;
+
+                const points = [];
+                const peakPoints = [];
+
+                for (let i = 0; i < NUM_BANDS; i++) {
+                    const r1 = i / NUM_BANDS;
+                    const r2 = (i + 1) / NUM_BANDS;
+                    const f1 = 20 * Math.pow(1000, r1);
+                    const f2 = 20 * Math.pow(1000, r2);
+
+                    const idx1 = Math.max(0, Math.floor((f1 / nyquist) * bufferLen));
+                    const idx2 = Math.min(bufferLen - 1, Math.ceil((f2 / nyquist) * bufferLen));
+
+                    let localMax = 0;
+                    for (let j = idx1; j <= idx2; j++) {
+                        if (dataArray[j] > localMax) localMax = dataArray[j];
+                        if (dataArray[j] > maxVal) {
+                            maxVal = dataArray[j];
+                            maxFreq = (j * nyquist) / bufferLen;
+                        }
+                    }
+
+                    if (localMax > peakBands[i]) peakBands[i] = localMax;
+                    else peakBands[i] = Math.max(0, peakBands[i] - 0.35);
+
+                    const x = (i + 0.5) * (w / NUM_BANDS);
+                    const y = plotH - ((localMax / 255) * (plotH - 12));
+                    const py = plotH - ((peakBands[i] / 255) * (plotH - 12));
+
+                    points.push({ x, y });
+                    peakPoints.push({ x, y: py });
+                }
+
+                // Draw Filled Gradient Spectrum Curve (FabFilter Style)
+                rtaCtx.beginPath();
+                rtaCtx.moveTo(0, plotH);
+                points.forEach(p => rtaCtx.lineTo(p.x, p.y));
+                rtaCtx.lineTo(w, plotH);
+                rtaCtx.closePath();
+
+                const fillGrad = rtaCtx.createLinearGradient(0, 0, 0, plotH);
+                fillGrad.addColorStop(0, 'rgba(0, 242, 254, 0.42)');
+                fillGrad.addColorStop(0.6, 'rgba(16, 185, 129, 0.16)');
+                fillGrad.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
+                rtaCtx.fillStyle = fillGrad;
+                rtaCtx.fill();
+
+                // Draw Crisp Spectrum Line
+                rtaCtx.beginPath();
+                points.forEach((p, idx) => idx === 0 ? rtaCtx.moveTo(p.x, p.y) : rtaCtx.lineTo(p.x, p.y));
+                rtaCtx.strokeStyle = '#00f2fe';
+                rtaCtx.lineWidth = 1.8;
+                rtaCtx.stroke();
+
+                // Draw Peak Hold Curve
+                rtaCtx.beginPath();
+                peakPoints.forEach((p, idx) => idx === 0 ? rtaCtx.moveTo(p.x, p.y) : rtaCtx.lineTo(p.x, p.y));
+                rtaCtx.strokeStyle = 'rgba(245, 158, 11, 0.65)';
+                rtaCtx.lineWidth = 1;
+                rtaCtx.stroke();
+
+                if (maxVal > 35) {
+                    document.getElementById('rtaPeakFreqLabel').innerText = maxFreq >= 1000 ? `${(maxFreq / 1000).toFixed(2)} kHz` : `${Math.round(maxFreq)} Hz`;
+                }
+            }
+
+            // Draw Crosshair Cursor
+            if (cursorPos) {
+                rtaCtx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+                rtaCtx.lineWidth = 1;
+                rtaCtx.beginPath();
+                rtaCtx.moveTo(cursorPos.x, 0);
+                rtaCtx.lineTo(cursorPos.x, plotH);
+                rtaCtx.moveTo(0, cursorPos.y);
+                rtaCtx.lineTo(w, cursorPos.y);
+                rtaCtx.stroke();
+            }
+        }
+
+        // =========================================================
+        // TAB 4: Patch Sheet & 220V Power Load Calculator
+        // =========================================================
+        const STRIP_COLORS = {
+            Red: 'bg-rose-500/15 text-rose-400 border-rose-500/40',
+            Yellow: 'bg-amber-500/15 text-amber-300 border-amber-500/40',
+            Green: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40',
+            Cyan: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/40',
+            Magenta: 'bg-purple-500/15 text-purple-300 border-purple-500/40',
+            White: 'bg-zinc-800 text-zinc-200 border-zinc-600'
+        };
+
+        function renderPatchTable() {
+            const tbody = document.getElementById('patchTableBody');
+            appState.patchList.sort((a, b) => a.ch - b.ch);
+
+            tbody.innerHTML = appState.patchList.map((item, idx) => {
+                const badge = STRIP_COLORS[item.color] || STRIP_COLORS.White;
+                return `
+                    <tr class="hover:bg-oled-surface transition">
+                        <td class="py-2.5 px-3 font-mono font-bold text-white">CH ${String(item.ch).padStart(2, '0')}</td>
+                        <td class="py-2.5 px-3">
+                            <span class="px-2 py-0.5 text-[11px] font-mono rounded border ${badge}">${item.color}</span>
+                        </td>
+                        <td class="py-2.5 px-3 font-medium text-zinc-100">${item.name}</td>
+                        <td class="py-2.5 px-3 text-zinc-400 font-mono text-xs">${item.mic}</td>
+                        <td class="py-2.5 px-3 font-mono text-cyan-400 text-xs">${item.port}</td>
+                        <td class="py-2.5 px-3 text-center">
+                            <button onclick="togglePatch48v(${idx})" class="px-2 py-0.5 rounded font-mono text-[11px] border transition ${item.p48 ? 'bg-rose-500/20 text-rose-400 border-rose-500/50 font-bold' : 'bg-black text-zinc-600 border-oled-border'}">
+                                ${item.p48 ? '+48V ON' : 'OFF'}
+                            </button>
+                        </td>
+                        <td class="py-2.5 px-3 text-right no-print">
+                            <button onclick="deletePatchRow(${idx})" class="text-zinc-600 hover:text-rose-400 px-2 py-1 transition">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            const maxCh = appState.patchList.reduce((m, i) => Math.max(m, i.ch), 0);
+            document.getElementById('newPatchCh').value = maxCh + 1;
+        }
+
+        function addPatchRow() {
+            const ch = parseInt(document.getElementById('newPatchCh').value) || 1;
+            const name = document.getElementById('newPatchName').value.trim() || `Channel ${ch}`;
+            const mic = document.getElementById('newPatchMic').value.trim() || 'SM58';
+            const port = document.getElementById('newPatchPort').value.trim() || `DL32-${String(ch).padStart(2, '0')}`;
+            const color = document.getElementById('newPatchColor').value;
+            const p48 = document.getElementById('newPatch48v').checked;
+
+            appState.patchList.push({ ch, color, name, mic, port, p48 });
+            document.getElementById('newPatchName').value = '';
+            document.getElementById('newPatch48v').checked = false;
+            saveStateToStorage();
+            renderPatchTable();
+            showToast(`ADDED CH ${ch}: ${name}`);
+        }
+
+        function togglePatch48v(idx) {
+            appState.patchList[idx].p48 = !appState.patchList[idx].p48;
+            saveStateToStorage();
+            renderPatchTable();
+        }
+
+        function deletePatchRow(idx) {
+            appState.patchList.splice(idx, 1);
+            saveStateToStorage();
+            renderPatchTable();
+        }
+
+        function loadPatchPreset(type) {
+            appState.patchList = type === 'band' ? JSON.parse(JSON.stringify(PRESET_BAND)) : JSON.parse(JSON.stringify(PRESET_CONFERENCE));
+            saveStateToStorage();
+            renderPatchTable();
+            showToast(type === 'band' ? 'LOADED: LIVE BAND PATCH' : 'LOADED: CONFERENCE PATCH');
+        }
+
+        function exportPatchCSV() {
+            let csv = '\uFEFFChannel,Color,Label,Mic/DI,Stagebox Port,+48V\n';
+            appState.patchList.forEach(r => {
+                csv += `${r.ch},${r.color},"${r.name}","${r.mic}","${r.port}",${r.p48 ? 'ON' : 'OFF'}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `FOH_Patch_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+            showToast('CSV EXPORTED');
+        }
+
+        // Power & Breaker Load Calculator
+        function setBreakerCap(amps) {
+            appState.breakerCap = amps;
+            document.querySelectorAll('.brk-btn').forEach(b => {
+                b.className = 'brk-btn px-2 py-0.5 rounded bg-black border border-oled-border text-zinc-400';
+            });
+            const active = document.getElementById('brk-' + amps);
+            if (active) active.className = 'brk-btn px-2 py-0.5 rounded bg-cyan-500/20 border border-cyan-500/60 text-cyan-300 font-bold';
+            saveStateToStorage();
+            renderPowerCalculator();
+        }
+
+        function renderPowerCalculator() {
+            const cap = appState.breakerCap || 20;
+            const container = document.getElementById('powerItemsList');
+            container.innerHTML = appState.powerList.map((item, idx) => `
+                <div class="flex items-center justify-between bg-black border border-oled-border px-3 py-1.5 rounded-lg text-xs">
+                    <span class="text-zinc-300">${item.name}</span>
+                    <div class="flex items-center space-x-3 font-mono">
+                        <span class="text-amber-400">${item.watts} W</span>
+                        <button onclick="removePowerItem(${idx})" class="text-zinc-600 hover:text-rose-400">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            const totalWatts = appState.powerList.reduce((sum, i) => sum + i.watts, 0);
+            const totalAmps = totalWatts / 220;
+            const loadPct = Math.min(100, Math.round((totalAmps / cap) * 100));
+
+            document.getElementById('totalWattsLabel').innerText = `${totalWatts.toLocaleString()} W`;
+            document.getElementById('totalAmpsLabel').innerText = `${totalAmps.toFixed(2)} A`;
+            document.getElementById('breakerCapLabel').innerText = `${cap}A BREAKER LOAD (SAFE LIMIT: ${(cap * 0.8).toFixed(0)}A)`;
+
+            const bar = document.getElementById('breakerBar');
+            const status = document.getElementById('breakerStatusText');
+            bar.style.width = `${loadPct}%`;
+
+            if (totalAmps >= cap * 0.9) {
+                bar.className = 'h-full bg-rose-500 transition-all duration-300';
+                status.className = 'text-rose-400 font-bold';
+                status.innerText = `${loadPct}% (OVERLOAD RISK)`;
+            } else if (totalAmps >= cap * 0.75) {
+                bar.className = 'h-full bg-amber-400 transition-all duration-300';
+                status.className = 'text-amber-400 font-bold';
+                status.innerText = `${loadPct}% (80% CAUTION)`;
+            } else {
+                bar.className = 'h-full bg-emerald-400 transition-all duration-300';
+                status.className = 'text-emerald-400 font-bold';
+                status.innerText = `${loadPct}% (SAFE)`;
+            }
+        }
+
+        function addPowerItem(name, watts) {
+            appState.powerList.push({ id: Date.now(), name, watts });
+            saveStateToStorage();
+            renderPowerCalculator();
+        }
+
+        function addCustomPowerItem() {
+            const name = document.getElementById('powerNameInput').value.trim() || 'Custom Audio Gear';
+            const watts = parseInt(document.getElementById('powerWattInput').value) || 300;
+            addPowerItem(name, watts);
+            document.getElementById('powerNameInput').value = '';
+        }
+
+        function removePowerItem(idx) {
+            appState.powerList.splice(idx, 1);
+            saveStateToStorage();
+            renderPowerCalculator();
+        }
+    </script>
+</body>
+</html>
